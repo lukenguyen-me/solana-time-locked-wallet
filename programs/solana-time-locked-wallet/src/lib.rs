@@ -41,11 +41,22 @@ pub mod solana_time_locked_wallet {
 
         Ok(())
     }
+
+    pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
+        let wallet = &mut ctx.accounts.wallet;
+
+        let now = Clock::get()?.unix_timestamp;
+        if now < wallet.unlock_timestamp {
+            return Err(ErrorCode::WalletIsLocked.into());
+        }
+
+        Ok(())
+    }
 }
 
 #[account]
 #[derive(Default)]
-pub struct TimeLockedWallet {
+pub struct WalletState {
     pub owner: Pubkey,
     pub balance: u64,
     pub unlock_timestamp: i64,
@@ -60,7 +71,21 @@ pub struct InitializeLock<'info> {
         seeds = [b"wallet", user.key().as_ref()],
         bump,
     )]
-    pub wallet: Account<'info, TimeLockedWallet>,
+    pub wallet: Account<'info, WalletState>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+#[instruction()]
+pub struct Withdraw<'info> {
+    #[account(mut,
+        seeds = [b"wallet", user.key().as_ref()],
+        close = user,
+        bump,
+    )]
+    pub wallet: Account<'info, WalletState>,
     #[account(mut)]
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -70,4 +95,6 @@ pub struct InitializeLock<'info> {
 pub enum ErrorCode {
     #[msg("The unlock timestamp must be in the future.")]
     UnlockTimestampPassed,
+    #[msg("The wallet is locked.")]
+    WalletIsLocked,
 }
