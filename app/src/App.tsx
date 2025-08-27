@@ -16,7 +16,7 @@ import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
 import Deposit from "./components/Deposit";
 
-const rpcUrl = import.meta.env.PUBLIC_RPC_URL;
+const rpcUrl = import.meta.env.VITE_RPC_URL;
 const network = isUrl(rpcUrl) ? rpcUrl : clusterApiUrl("devnet");
 const wallets = [new PhantomWalletAdapter()];
 

@@ -2,6 +2,6 @@ import { type SolanaTimeLockedWallet as LocalSolanaTimeLockedWallet } from "./lo
 import localIDl from "./localnet/timeLockedWallet.json";
 
 export const ProgramIdl =
-  import.meta.env.PUBLIC_NETWORK === "localnet" ? localIDl : localIDl;
+  import.meta.env.VITE_NETWORK === "localnet" ? localIDl : localIDl;
 
 export type SolanaTimeLockedWallet = LocalSolanaTimeLockedWallet;

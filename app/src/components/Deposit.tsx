@@ -1,4 +1,4 @@
-import { DatePicker } from "@/components/DatePicker";
+import { DateTimePicker } from "@/components/DateTimePicker";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,6 +15,7 @@ import { ProgramIdl, type SolanaTimeLockedWallet } from "@/idl";
 import * as anchor from "@coral-xyz/anchor";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import dayjs from "dayjs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -34,7 +35,7 @@ export default function Deposit() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       amount: 0,
-      unlockTime: new Date(),
+      unlockTime: dayjs().endOf("day").toDate(),
     },
   });
 
@@ -49,7 +50,36 @@ export default function Deposit() {
       return;
     }
 
-    //TODO: implement
+    try {
+      const provider = new AnchorProvider(connection, wallet, {});
+      const program = new Program<SolanaTimeLockedWallet>(
+        ProgramIdl as SolanaTimeLockedWallet,
+        provider,
+      );
+      const [walletPDA] = PublicKey.findProgramAddressSync(
+        [Buffer.from("wallet"), wallet.publicKey.toBuffer()],
+        program.programId,
+      );
+
+      const signature = await program.methods
+        .initializeLock(
+          new BN(data.amount),
+          new BN(Math.floor(data.unlockTime.getTime() / 1000)),
+        )
+        .accounts({
+          wallet: walletPDA,
+          user: wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([])
+        .rpc();
+
+      toast.success(
+        `Initialize wallet successfully! Transaction confirmed: ${signature}`,
+      );
+    } catch (error) {
+      toast.error(`Initialize wallet failed: ${(error as Error).message}`);
+    }
   };
 
   return (
@@ -91,7 +121,7 @@ export default function Deposit() {
                 Time when you can withdraw your funds
               </FormDescription>
               <FormControl>
-                <DatePicker
+                <DateTimePicker
                   placeholder="Select unlock time"
                   date={field.value}
                   onChange={field.onChange}
