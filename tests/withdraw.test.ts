@@ -21,20 +21,25 @@ describe("withdraw program", () => {
       "./target/deploy/solana_time_locked_wallet.so"
     );
 
+    const now = Math.floor(Date.now() / 1000);
     [walletPDA] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("wallet"), user.publicKey.toBuffer()],
+      [
+        Buffer.from("wallet"),
+        user.publicKey.toBuffer(),
+        new anchor.BN(now).toArrayLike(Buffer, "le", 8),
+      ],
       program.programId
     );
 
     svm.airdrop(user.publicKey, BigInt(userInitBalance));
 
-    const now = Math.floor(Date.now() / 1000);
     const unlockTimestamp = now + 60 * 60 * 24;
 
     const initializeIx = await program.methods
       .initializeLock(
         new anchor.BN(depositAmount),
-        new anchor.BN(unlockTimestamp)
+        new anchor.BN(unlockTimestamp),
+        new anchor.BN(now)
       )
       .accounts({
         wallet: walletPDA,
@@ -59,7 +64,7 @@ describe("withdraw program", () => {
     const walletBalanceBefore = Number(svm.getBalance(walletPDA));
 
     const withdrawIx = await program.methods
-      .withdraw()
+      .withdraw(new anchor.BN(now))
       .accounts({
         wallet: walletPDA,
         user: user.publicKey,
@@ -90,7 +95,7 @@ describe("withdraw program", () => {
     expect(walletBalanceBefore).gte(depositAmount);
 
     const withdrawIx = await program.methods
-      .withdraw()
+      .withdraw(new anchor.BN(now))
       .accounts({
         wallet: walletPDA,
         user: user.publicKey,

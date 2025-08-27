@@ -10,6 +10,7 @@ pub mod solana_time_locked_wallet {
         ctx: Context<InitializeLock>,
         amount: u64,
         unlock_timestamp: i64,
+        created_timestamp: i64,
     ) -> Result<()> {
         let wallet = &mut ctx.accounts.wallet;
         let system_program = &ctx.accounts.system_program;
@@ -31,6 +32,7 @@ pub mod solana_time_locked_wallet {
         wallet.owner = ctx.accounts.user.key();
         wallet.balance = amount;
         wallet.unlock_timestamp = unlock_timestamp;
+        wallet.created_timestamp = created_timestamp;
 
         msg!(
             "Create time-locked wallet for {}, with {}, unlock at {}",
@@ -42,7 +44,7 @@ pub mod solana_time_locked_wallet {
         Ok(())
     }
 
-    pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
+    pub fn withdraw(ctx: Context<Withdraw>, _created_timestamp: i64) -> Result<()> {
         let wallet = &mut ctx.accounts.wallet;
 
         let now = Clock::get()?.unix_timestamp;
@@ -60,15 +62,16 @@ pub struct WalletState {
     pub owner: Pubkey,
     pub balance: u64,
     pub unlock_timestamp: i64,
+    pub created_timestamp: i64,
 }
 
 #[derive(Accounts)]
-#[instruction(amount: u64, unlock_timestamp: i64)]
+#[instruction(amount: u64, unlock_timestamp: i64, created_timestamp: i64)]
 pub struct InitializeLock<'info> {
     #[account(init,
         payer = user,
-        space = 8 + 32 + 8 + 8, // init + owner + balance + unlock_timestamp
-        seeds = [b"wallet", user.key().as_ref()],
+        space = 8 + 32 + 8 + 8 + 8, // init + owner + balance + unlock_timestamp + created_timestamp
+        seeds = [b"wallet", user.key().as_ref(), &created_timestamp.to_le_bytes()],
         bump,
     )]
     pub wallet: Account<'info, WalletState>,
@@ -78,10 +81,10 @@ pub struct InitializeLock<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction()]
+#[instruction(created_timestamp: i64)]
 pub struct Withdraw<'info> {
     #[account(mut,
-        seeds = [b"wallet", user.key().as_ref()],
+        seeds = [b"wallet", user.key().as_ref(), &created_timestamp.to_le_bytes()],
         close = user,
         bump,
     )]
