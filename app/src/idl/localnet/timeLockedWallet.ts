@@ -30,6 +30,10 @@ export type SolanaTimeLockedWallet = {
                 kind: "account";
                 path: "user";
               },
+              {
+                kind: "arg";
+                path: "createdTimestamp";
+              },
             ];
           };
         },
@@ -52,6 +56,10 @@ export type SolanaTimeLockedWallet = {
           name: "unlockTimestamp";
           type: "i64";
         },
+        {
+          name: "createdTimestamp";
+          type: "i64";
+        },
       ];
     },
     {
@@ -71,6 +79,10 @@ export type SolanaTimeLockedWallet = {
                 kind: "account";
                 path: "user";
               },
+              {
+                kind: "arg";
+                path: "createdTimestamp";
+              },
             ];
           };
         },
@@ -84,7 +96,12 @@ export type SolanaTimeLockedWallet = {
           address: "11111111111111111111111111111111";
         },
       ];
-      args: [];
+      args: [
+        {
+          name: "createdTimestamp";
+          type: "i64";
+        },
+      ];
     },
   ];
   accounts: [
@@ -121,6 +138,10 @@ export type SolanaTimeLockedWallet = {
           },
           {
             name: "unlockTimestamp";
+            type: "i64";
+          },
+          {
+            name: "createdTimestamp";
             type: "i64";
           },
         ];

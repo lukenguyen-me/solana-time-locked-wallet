@@ -39,6 +39,10 @@
               {
                 "kind": "account",
                 "path": "user"
+              },
+              {
+                "kind": "arg",
+                "path": "created_timestamp"
               }
             ]
           }
@@ -60,6 +64,10 @@
         },
         {
           "name": "unlock_timestamp",
+          "type": "i64"
+        },
+        {
+          "name": "created_timestamp",
           "type": "i64"
         }
       ]
@@ -96,6 +104,10 @@
               {
                 "kind": "account",
                 "path": "user"
+              },
+              {
+                "kind": "arg",
+                "path": "created_timestamp"
               }
             ]
           }
@@ -110,7 +122,12 @@
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "_created_timestamp",
+          "type": "i64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -156,6 +173,10 @@
           },
           {
             "name": "unlock_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "created_timestamp",
             "type": "i64"
           }
         ]

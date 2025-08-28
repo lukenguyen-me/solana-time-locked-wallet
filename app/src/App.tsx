@@ -1,4 +1,6 @@
+import Deposit from "@/components/Deposit";
 import Header from "@/components/Header";
+import ListWallets from "@/components/ListWallets";
 import {
   Card,
   CardContent,
@@ -14,7 +16,6 @@ import {
 } from "@solana/wallet-adapter-react";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
-import Deposit from "./components/Deposit";
 
 const rpcUrl = import.meta.env.VITE_RPC_URL;
 const network = isUrl(rpcUrl) ? rpcUrl : clusterApiUrl("devnet");
@@ -43,7 +44,9 @@ function App() {
                 <CardTitle>Your Wallets</CardTitle>
                 <CardDescription>All your existing wallets.</CardDescription>
               </CardHeader>
-              <CardContent></CardContent>
+              <CardContent>
+                <ListWallets />
+              </CardContent>
             </Card>
           </div>
         </main>

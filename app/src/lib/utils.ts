@@ -1,3 +1,4 @@
+import * as anchor from "@coral-xyz/anchor";
 import { clsx, type ClassValue } from "clsx";
 import dayjs from "dayjs";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
@@ -25,4 +26,8 @@ export function isUrl(value: string) {
 
 export function formatMoney(balance: number) {
   return balance.toLocaleString();
+}
+
+export function convertLamportsToSol(lamports: number) {
+  return lamports / anchor.web3.LAMPORTS_PER_SOL;
 }

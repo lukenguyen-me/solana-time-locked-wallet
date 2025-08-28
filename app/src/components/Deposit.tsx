@@ -11,8 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { ProgramIdl, type SolanaTimeLockedWallet } from "@/idl";
-import * as anchor from "@coral-xyz/anchor";
+import { useDepositWallet } from "@/queries/wallet.query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import dayjs from "dayjs";
@@ -20,17 +19,17 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const { AnchorProvider, BN, Program } = anchor;
-const { PublicKey, SystemProgram } = anchor.web3;
-
 const formSchema = z.object({
   amount: z.number("Amount must be greater than 0").min(1),
-  unlockTime: z.date().min(new Date()),
+  unlockTime: z.date(),
 });
 
 export default function Deposit() {
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
+
+  const { mutateAsync: depositWallet } = useDepositWallet();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,28 +50,12 @@ export default function Deposit() {
     }
 
     try {
-      const provider = new AnchorProvider(connection, wallet, {});
-      const program = new Program<SolanaTimeLockedWallet>(
-        ProgramIdl as SolanaTimeLockedWallet,
-        provider,
-      );
-      const [walletPDA] = PublicKey.findProgramAddressSync(
-        [Buffer.from("wallet"), wallet.publicKey.toBuffer()],
-        program.programId,
-      );
-
-      const signature = await program.methods
-        .initializeLock(
-          new BN(data.amount),
-          new BN(Math.floor(data.unlockTime.getTime() / 1000)),
-        )
-        .accounts({
-          wallet: walletPDA,
-          user: wallet.publicKey,
-          systemProgram: SystemProgram.programId,
-        })
-        .signers([])
-        .rpc();
+      const signature = await depositWallet({
+        connection,
+        userWallet: wallet,
+        amount: data.amount,
+        unlockTime: data.unlockTime,
+      });
 
       toast.success(
         `Initialize wallet successfully! Transaction confirmed: ${signature}`,
