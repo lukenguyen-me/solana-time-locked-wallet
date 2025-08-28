@@ -14,20 +14,17 @@ import {
   formatMoney,
   truncateWalletAddress,
 } from "@/lib/utils";
-import { useGetUserWallets, useWithdrawWallet } from "@/queries/wallet.query";
+import { useGetAllWallets, useWithdrawWallet } from "@/queries/wallet.query";
 import type { TimeLockedWallet } from "@/types/wallet";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { HandCoins } from "lucide-react";
 import { toast } from "sonner";
 
-export default function ListWallets() {
+export default function ListAllWallets() {
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
 
-  const { data: userWallets, isLoading } = useGetUserWallets(
-    connection,
-    wallet,
-  );
+  const { data: allWallets, isLoading } = useGetAllWallets(connection);
 
   const { mutateAsync: withdrawWallet } = useWithdrawWallet();
 
@@ -71,8 +68,8 @@ export default function ListWallets() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {userWallets &&
-          userWallets.map((e) => (
+        {allWallets &&
+          allWallets.map((e) => (
             <TableRow key={e.id}>
               <TableCell>{truncateWalletAddress(e.id)}</TableCell>
               <TableCell className="text-center">
@@ -85,14 +82,16 @@ export default function ListWallets() {
                 {e.createdAt.format("DD-MM-YYYY HH:mm:ss")}
               </TableCell>
               <TableCell className="text-right">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onWithdraw(e)}
-                >
-                  <HandCoins />
-                  Withdraw
-                </Button>
+                {e.owner === wallet?.publicKey.toBase58() && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onWithdraw(e)}
+                  >
+                    <HandCoins />
+                    Withdraw
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}

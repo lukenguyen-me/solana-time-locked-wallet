@@ -20,6 +20,35 @@ const dummyWallet = {
   },
 };
 
+export const useGetAllWallets = (connection: anchor.web3.Connection) => {
+  const queryClient = useStore($queryClient);
+  const provider = new AnchorProvider(connection, dummyWallet, {});
+  const program = new Program<SolanaTimeLockedWallet>(
+    ProgramIdl as SolanaTimeLockedWallet,
+    provider,
+  );
+
+  return useQuery(
+    {
+      queryKey: ["all-wallets", "user-wallet"],
+      queryFn: async (): Promise<TimeLockedWallet[]> => {
+        const wallets = await program.account.walletState.all();
+        return wallets.map(
+          (wallet) =>
+            ({
+              id: wallet.publicKey.toString(),
+              owner: wallet.account.owner.toBase58(),
+              amount: wallet.account.balance.toNumber(),
+              unlockTime: dayjs.unix(wallet.account.unlockTimestamp.toNumber()),
+              createdAt: dayjs.unix(wallet.account.createdTimestamp.toNumber()),
+            }) as TimeLockedWallet,
+        );
+      },
+    },
+    queryClient,
+  );
+};
+
 export const useGetUserWallets = (
   connection: anchor.web3.Connection,
   wallet?: AnchorWallet | null,
@@ -33,13 +62,21 @@ export const useGetUserWallets = (
 
   return useQuery(
     {
-      queryKey: ["wallets"],
+      queryKey: ["user-wallets"],
       queryFn: async (): Promise<TimeLockedWallet[]> => {
-        const wallets = await program.account.walletState.all();
+        const wallets = await program.account.walletState.all([
+          {
+            memcmp: {
+              offset: 8, // The offset of the owner's public key in your account data
+              bytes: (wallet || dummyWallet).publicKey.toBase58(),
+            },
+          },
+        ]);
         return wallets.map(
           (wallet) =>
             ({
               id: wallet.publicKey.toString(),
+              owner: wallet.account.owner.toBase58(),
               amount: wallet.account.balance.toNumber(),
               unlockTime: dayjs.unix(wallet.account.unlockTimestamp.toNumber()),
               createdAt: dayjs.unix(wallet.account.createdTimestamp.toNumber()),
@@ -100,7 +137,7 @@ export const useDepositWallet = () => {
         return signature;
       },
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["wallets"] });
+        queryClient.invalidateQueries({ queryKey: ["user-wallets"] });
       },
     },
     queryClient,
@@ -148,7 +185,7 @@ export const useWithdrawWallet = () => {
         return signature;
       },
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["wallets"] });
+        queryClient.invalidateQueries({ queryKey: ["user-wallets"] });
       },
     },
     queryClient,

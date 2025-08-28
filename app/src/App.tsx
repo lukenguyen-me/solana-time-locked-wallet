@@ -1,5 +1,6 @@
 import Deposit from "@/components/Deposit";
 import Header from "@/components/Header";
+import ListAllWallets from "@/components/ListAllWallets";
 import ListWallets from "@/components/ListWallets";
 import {
   Card,
@@ -16,6 +17,7 @@ import {
 } from "@solana/wallet-adapter-react";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 
 const rpcUrl = import.meta.env.VITE_RPC_URL;
 const network = isUrl(rpcUrl) ? rpcUrl : clusterApiUrl("devnet");
@@ -40,12 +42,19 @@ function App() {
               </CardContent>
             </Card>
             <Card className="flex-1">
-              <CardHeader>
-                <CardTitle>Your Wallets</CardTitle>
-                <CardDescription>All your existing wallets.</CardDescription>
-              </CardHeader>
               <CardContent>
-                <ListWallets />
+                <Tabs defaultValue="my-wallets">
+                  <TabsList>
+                    <TabsTrigger value="my-wallets">My Wallets</TabsTrigger>
+                    <TabsTrigger value="all-wallets">All Wallets</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="my-wallets">
+                    <ListWallets />
+                  </TabsContent>
+                  <TabsContent value="all-wallets">
+                    <ListAllWallets />
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </div>
