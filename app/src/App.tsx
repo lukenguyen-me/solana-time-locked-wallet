@@ -43,16 +43,16 @@ function App() {
             </Card>
             <Card className="flex-1">
               <CardContent>
-                <Tabs defaultValue="my-wallets">
+                <Tabs defaultValue="all-wallets">
                   <TabsList>
-                    <TabsTrigger value="my-wallets">My Wallets</TabsTrigger>
                     <TabsTrigger value="all-wallets">All Wallets</TabsTrigger>
+                    <TabsTrigger value="my-wallets">My Wallets</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="my-wallets">
-                    <ListWallets />
-                  </TabsContent>
                   <TabsContent value="all-wallets">
                     <ListAllWallets />
+                  </TabsContent>
+                  <TabsContent value="my-wallets">
+                    <ListWallets />
                   </TabsContent>
                 </Tabs>
               </CardContent>

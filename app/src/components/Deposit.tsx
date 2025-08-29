@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { convertLamportsToSol, formatMoney } from "@/lib/utils";
 import { useDepositWallet } from "@/queries/wallet.query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import dayjs from "dayjs";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -27,6 +29,7 @@ const formSchema = z.object({
 export default function Deposit() {
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
+  const [balance, setBalance] = useState<number>(0);
 
   const { mutateAsync: depositWallet } = useDepositWallet();
 
@@ -37,6 +40,14 @@ export default function Deposit() {
       unlockTime: dayjs().endOf("day").toDate(),
     },
   });
+
+  useEffect(() => {
+    if (connection && wallet?.publicKey) {
+      connection.getBalance(wallet.publicKey).then((lamports) => {
+        setBalance(convertLamportsToSol(lamports));
+      });
+    }
+  }, [connection, wallet?.publicKey]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (!wallet) {
@@ -73,9 +84,9 @@ export default function Deposit() {
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Target Fund</FormLabel>
+              <FormLabel>Amount</FormLabel>
               <FormDescription>
-                Amount in SOL that you expect to raise
+                Your balance: {formatMoney(balance)} SOL
               </FormDescription>
               <FormControl>
                 <Input

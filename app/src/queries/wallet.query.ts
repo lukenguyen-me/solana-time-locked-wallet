@@ -33,16 +33,22 @@ export const useGetAllWallets = (connection: anchor.web3.Connection) => {
       queryKey: ["all-wallets", "user-wallet"],
       queryFn: async (): Promise<TimeLockedWallet[]> => {
         const wallets = await program.account.walletState.all();
-        return wallets.map(
-          (wallet) =>
-            ({
-              id: wallet.publicKey.toString(),
-              owner: wallet.account.owner.toBase58(),
-              amount: wallet.account.balance.toNumber(),
-              unlockTime: dayjs.unix(wallet.account.unlockTimestamp.toNumber()),
-              createdAt: dayjs.unix(wallet.account.createdTimestamp.toNumber()),
-            }) as TimeLockedWallet,
-        );
+        return wallets
+          .map(
+            (wallet) =>
+              ({
+                id: wallet.publicKey.toString(),
+                owner: wallet.account.owner.toBase58(),
+                amount: wallet.account.balance.toNumber(),
+                unlockTime: dayjs.unix(
+                  wallet.account.unlockTimestamp.toNumber(),
+                ),
+                createdAt: dayjs.unix(
+                  wallet.account.createdTimestamp.toNumber(),
+                ),
+              }) as TimeLockedWallet,
+          )
+          .sort((a, b) => b.createdAt.unix() - a.createdAt.unix());
       },
     },
     queryClient,
@@ -72,16 +78,22 @@ export const useGetUserWallets = (
             },
           },
         ]);
-        return wallets.map(
-          (wallet) =>
-            ({
-              id: wallet.publicKey.toString(),
-              owner: wallet.account.owner.toBase58(),
-              amount: wallet.account.balance.toNumber(),
-              unlockTime: dayjs.unix(wallet.account.unlockTimestamp.toNumber()),
-              createdAt: dayjs.unix(wallet.account.createdTimestamp.toNumber()),
-            }) as TimeLockedWallet,
-        );
+        return wallets
+          .map(
+            (wallet) =>
+              ({
+                id: wallet.publicKey.toString(),
+                owner: wallet.account.owner.toBase58(),
+                amount: wallet.account.balance.toNumber(),
+                unlockTime: dayjs.unix(
+                  wallet.account.unlockTimestamp.toNumber(),
+                ),
+                createdAt: dayjs.unix(
+                  wallet.account.createdTimestamp.toNumber(),
+                ),
+              }) as TimeLockedWallet,
+          )
+          .sort((a, b) => b.createdAt.unix() - a.createdAt.unix());
       },
       enabled: !!wallet,
     },
