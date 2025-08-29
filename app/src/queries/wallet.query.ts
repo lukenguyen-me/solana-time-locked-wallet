@@ -30,7 +30,7 @@ export const useGetAllWallets = (connection: anchor.web3.Connection) => {
 
   return useQuery(
     {
-      queryKey: ["all-wallets", "user-wallet"],
+      queryKey: ["all-wallets", "user-wallets"],
       queryFn: async (): Promise<TimeLockedWallet[]> => {
         const wallets = await program.account.walletState.all();
         return wallets
@@ -138,7 +138,7 @@ export const useDepositWallet = () => {
             new BN(Math.floor(unlockTime.getTime() / 1000)),
             new BN(now),
           )
-          .accounts({
+          .accountsStrict({
             wallet: walletPDA,
             user: userWallet.publicKey,
             systemProgram: SystemProgram.programId,
@@ -150,6 +150,7 @@ export const useDepositWallet = () => {
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["user-wallets"] });
+        queryClient.invalidateQueries({ queryKey: ["all-wallets"] });
       },
     },
     queryClient,
@@ -186,7 +187,7 @@ export const useWithdrawWallet = () => {
 
         const signature = await program.methods
           .withdraw(new BN(wallet.createdAt.unix()))
-          .accounts({
+          .accountsStrict({
             wallet: walletPDA,
             user: userWallet.publicKey,
             systemProgram: SystemProgram.programId,

@@ -2,6 +2,12 @@
 
 A decentralized time-locked wallet built on Solana that allows users to deposit SOL and withdraw it only after a specified unlock timestamp.
 
+![Demo](./app/public/demo.gif)
+
+## Demo
+
+Demo deployed on **Devnet** at [https://dancing-kitten-128462.netlify.app/](https://dancing-kitten-128462.netlify.app/)
+
 ## Features
 
 - **Time-locked deposits**: Lock SOL for a specific duration

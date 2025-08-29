@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
-  amount: z.number("Amount must be greater than 0").min(1),
+  amount: z.number("Amount must be greater than 0").gt(0),
   unlockTime: z.date(),
 });
 

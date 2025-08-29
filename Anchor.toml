@@ -8,11 +8,14 @@ skip-lint = false
 [programs.localnet]
 solana_time_locked_wallet = "AgrusQgGxVBPiKBjjNAQx82u1KWP1fwAJ1wmkxNVKHWQ"
 
+[programs.devnet]
+solana_time_locked_wallet = "AgrusQgGxVBPiKBjjNAQx82u1KWP1fwAJ1wmkxNVKHWQ"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
